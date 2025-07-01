@@ -7,7 +7,7 @@ class CityController {
     constructor() {
         this.cityService = new CityService();
     }
-
+ 
     createCityController = async (req, res) => {
         try {
             const { name, country_id } = req.body;
