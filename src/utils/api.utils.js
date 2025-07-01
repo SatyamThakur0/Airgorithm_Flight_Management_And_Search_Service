@@ -3,7 +3,7 @@ export class ApiResponse {
     message;
     ok;
     status;
-    constructor(message = "success", data = null, ok = true, status = 200) {
+    constructor(ok = true, message = "success", status = 200, data = null) {
         this.data = data;
         this.message = message;
         this.status = status;
@@ -26,8 +26,8 @@ export class ApiError extends Error {
     errors;
     message;
     constructor(
-        status = 500,
         message = "Something went wrong",
+        status = 500,
         errors = [],
         stack = ""
     ) {
