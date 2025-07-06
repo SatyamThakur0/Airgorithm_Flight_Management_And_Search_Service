@@ -6,7 +6,10 @@ const flightController = new FlightController();
 
 router.post("/", flightController.createFlightController);
 router.get("/", flightController.getAllFlightsController);
-
+router.get(
+    "/search",
+    flightController.getFlightsByDestinationAndSourceCityIdController
+);
 router.get("/:id", flightController.getFlightByIdController);
 router.get(
     "/number/:flightNumber",

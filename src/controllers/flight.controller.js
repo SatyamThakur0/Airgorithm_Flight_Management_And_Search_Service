@@ -154,7 +154,40 @@ class FlightController {
         }
     };
 
+    getFlightsByDestinationAndSourceCityIdController = async (req, res) => {
+        try {
+            const { source, destination, date } = req.body;
 
+            if (!source || !destination || !date) {
+                return res
+                    .status(400)
+                    .json(
+                        new ApiResponse(
+                            false,
+                            "Both source and destination cities are required",
+                            400
+                        )
+                    );
+            }
+
+            const flights =
+                await this.flightService.getFlightsBySourceAndDestinationCityIdService(
+                    source,
+                    destination,
+                    date
+                );
+            return res.json(
+                new ApiResponse(
+                    true,
+                    "Flights fetched successfully",
+                    200,
+                    flights
+                )
+            );
+        } catch (error) {
+            return res.json(new ApiError(error.message));
+        }
+    };
 
     updateFlightSourceAirportController = async (req, res) => {
         try {
