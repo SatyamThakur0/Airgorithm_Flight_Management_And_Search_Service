@@ -19,7 +19,7 @@ class CountryController {
                 country
             );
             return res.json(
-                new ApiResponse(true, "New Country created.", newCountry)
+                new ApiResponse(true, "New Country created.", 200, newCountry)
             );
         } catch (error) {
             if (error instanceof ApiError || error instanceof DatabaseError) {

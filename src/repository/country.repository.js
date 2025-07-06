@@ -1,5 +1,5 @@
 import { getPool } from "../utils/dbPool.utils.js";
-import { ApiError } from "../utils/api.utils.js";
+import { ApiError, ApiResponse } from "../utils/api.utils.js";
 
 class CountryRepository {
     pool = getPool();
@@ -63,6 +63,23 @@ class CountryRepository {
         }
     };
 
+    getCountryByCityId = async (id) => {
+        const client = await this.pool.connect();
+        try {
+            const query = `SELECT * FROM country co
+            INNER JOIN city c ON c.country_id = co.id
+            WHERE c.id = $1`;
+            const result = await client.query(query, [id]);
+            const newCountry = result.rows[0];
+            if(!newCountry){
+                return ApiResponse(false, "Country not found", 404);
+            }
+            return newCountry;
+        } finally {
+            await client.release();
+        }
+    };
+
     getCountryByName = async (name) => {
         const client = await this.pool.connect();
         try {
@@ -92,6 +109,7 @@ class CountryRepository {
             await client.release();
         }
     };
+
     updateCountryName = async (id, newName) => {
         const client = await this.pool.connect();
         try {
@@ -106,6 +124,7 @@ class CountryRepository {
             await client.release();
         }
     };
+
     updateCountryCode = async (id, newCode) => {
         const client = await this.pool.connect();
         try {

@@ -140,6 +140,7 @@ class AirportRepository {
                            a.id as airport_id,
                            a.name as airport_name,
                            a.code as airport_code,
+                           a.created_at, a.updated_at
                            c.id AS city_id,
                            c.name AS city_name,
                            c.created_at AS city_created_at,
