@@ -102,8 +102,8 @@ export const flightSearchResponse = (flight) => {
     return {
         id: flight.id,
         flight_number: flight.flight_number,
-        departure_time: flight.departure_time,
-        arrival_time: flight.arrival_time,
+        departure_time: flight.departure_time.toLocaleString(),
+        arrival_time: flight.arrival_time.toLocaleString(),
         price: flight.price,
         available_seats: flight.airplane_capacity - flight.booked_seats,
         status: flight.status,

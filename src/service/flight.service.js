@@ -59,7 +59,7 @@ class FlightService {
     ) => {
         let STOPS = 1;
         const MIN_LAYOVER = 30 * 60 * 1000;
-        let MAX_LAYOVER = 180 * 60 * 1000;
+        let MAX_LAYOVER = 3 * 60 * 60 * 1000;
         const MAX_INTERNATIONAL_LAYOVER = 10 * 60 * 60 * 1000;
         const allJourney = []; // [ [f1, f2], [f3, f4], [f5, f6] ]
         const queue = []; // JourneyTriplet((set), [f1, f2, f3 ...], stops)
@@ -69,22 +69,22 @@ class FlightService {
                 source_city_id,
                 departure_date
             );
+        // console.log(flights.length);
 
-        const sourceCountry = await this.countryRepository.getCountryByCityId(
-            source_city_id
-        );
-        const destinationCountry =
-            await this.countryRepository.getCountryByCityId(
+        const sourceCountryId =
+            await this.countryRepository.getCountryIdByCityId(source_city_id);
+        const destinationCountryId =
+            await this.countryRepository.getCountryIdByCityId(
                 destination_city_id
             );
-        if (sourceCountry !== destinationCountry) {
+        if (sourceCountryId !== destinationCountryId) {
             STOPS = 3;
             MAX_LAYOVER = MAX_INTERNATIONAL_LAYOVER;
         }
 
         for (const flight of flights) {
             const set = new Set();
-            set.add(flight.city_id);
+            set.add(flight.source_city_id);
             queue.push(new JourneyTriplet(set, [flight.id], STOPS));
         }
 
@@ -107,23 +107,21 @@ class FlightService {
                 continue;
             }
 
-            const minDepTime = new Date(
-                new Date(lastFlight.arrival_time).getTime() + MIN_LAYOVER
-            ).toISOString();
-            const maxDepTime = new Date(
-                new Date(lastFlight.arrival_time).getTime() +
-                    MAX_INTERNATIONAL_LAYOVER
-            ).toISOString();
-
             const nextFlights =
                 await this.flightRepository.getFlightsWithinTimeWindowByAirportId(
-                    lastFlight.destination_airport_id,
-                    minDepTime,
-                    maxDepTime
+                    lastFlight.destination_airport_id
                 );
 
             for (const flight of nextFlights) {
-                if (!visited.has(flight.destination_city_id)) {
+                const layover =
+                    new Date(flight.departure_time).getTime() -
+                    new Date(lastFlight.arrival_time).getTime();
+
+                if (
+                    layover >= MIN_LAYOVER &&
+                    layover <= MAX_LAYOVER &&
+                    !visited.has(flight.destination_city_id)
+                ) {
                     const newFlights = [...flights, flight.id];
                     const newSet = new Set(visited);
                     newSet.add(flight.destination_city_id);

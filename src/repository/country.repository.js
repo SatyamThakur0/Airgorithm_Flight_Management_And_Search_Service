@@ -63,16 +63,16 @@ class CountryRepository {
         }
     };
 
-    getCountryByCityId = async (id) => {
+    getCountryIdByCityId = async (id) => {
         const client = await this.pool.connect();
         try {
-            const query = `SELECT * FROM country co
+            const query = `SELECT co.id FROM country co
             INNER JOIN city c ON c.country_id = co.id
             WHERE c.id = $1`;
             const result = await client.query(query, [id]);
             const newCountry = result.rows[0];
             if(!newCountry){
-                return ApiResponse(false, "Country not found", 404);
+                return new ApiResponse(false, "Country not found", 404);
             }
             return newCountry;
         } finally {

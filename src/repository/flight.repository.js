@@ -165,7 +165,7 @@ class FlightRepository {
         const client = await this.pool.connect();
         try {
             const query = `
-            SELECT f.id, sc.id as city_id
+            SELECT f.id, sc.id as source_city_id
             FROM flight f
             INNER JOIN airport sa on sa.id = f.source_airport_id
             INNER JOIN city sc on sc.id = sa.city_id
@@ -201,12 +201,9 @@ class FlightRepository {
             INNER JOIN city sc on sc.id = sa.city_id
             INNER JOIN airport da on da.id = f.destination_airport_id
             INNER JOIN city dc on dc.id = da.city_id
-            WHERE f.source_airport_id = $1
-            AND f.departure_time BETWEEN $2 AND $3`;
+            WHERE f.source_airport_id = $1`;
             const result = await client.query(query, [
                 airportId,
-                fromTime,
-                toTime,
             ]);
             const flights = result.rows;
             return flights;
@@ -343,5 +340,4 @@ class FlightRepository {
         }
     };
 }
-
 export default FlightRepository;

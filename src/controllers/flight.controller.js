@@ -156,7 +156,8 @@ class FlightController {
 
     getFlightsByDestinationAndSourceCityIdController = async (req, res) => {
         try {
-            const { source, destination, date } = req.body;
+            // const { source, destination, date } = req.body;
+            const { source, destination, date } = req.query;
 
             if (!source || !destination || !date) {
                 return res
