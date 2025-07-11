@@ -65,7 +65,7 @@ class AirportController {
                 new ApiResponse(true, "airport fetched", 200, airport)
             );
         } catch (error) {
-            return res.status(error.status).json(new ApiError(error.message));
+            return res.status(500).json(new ApiError(error.message));
         }
     };
 
@@ -168,6 +168,19 @@ class AirportController {
         }
     };
 
+    getAirportsByCityNameREController = async (req, res) => {
+        try {
+            const { name } = req.params;
+            const airports =
+                await this.airportService.getAirportsByCityNameREService(name);
+            return res.json(
+                new ApiResponse(true, "airports fetched", 200, airports)
+            );
+        } catch (error) {
+            return res.json(new ApiError(error.message));
+        }
+    };
+    
     getAirportsInCityByCityIdController = async (req, res) => {
         try {
             const { id } = req.params;

@@ -140,7 +140,7 @@ class AirportRepository {
                            a.id as airport_id,
                            a.name as airport_name,
                            a.code as airport_code,
-                           a.created_at, a.updated_at
+                           a.created_at, a.updated_at,
                            c.id AS city_id,
                            c.name AS city_name,
                            c.created_at AS city_created_at,
@@ -156,6 +156,36 @@ class AirportRepository {
                            WHERE c.name = $1`;
 
             const result = await client.query(query, [name]);
+            const airports = result.rows.map((row) => AirportResponse(row));
+            return airports;
+        } finally {
+            await client.release();
+        }
+    };
+
+    getAirportsByCityNameRE = async (name) => {
+        const client = await this.pool.connect();
+        try {
+            const query = `SELECT 
+                           a.id as airport_id,
+                           a.name as airport_name,
+                           a.code as airport_code,
+                           a.created_at, a.updated_at,
+                           c.id AS city_id,
+                           c.name AS city_name,
+                           c.created_at AS city_created_at,
+                           c.updated_at AS city_updated_at,
+                           co.id AS country_id,
+                           co.name AS country_name,
+                           co.code AS country_code,
+                           co.created_at AS country_created_at,
+                           co.updated_at AS country_updated_at
+                           FROM airport a
+                           INNER JOIN city c ON a.city_id = c.id
+                           INNER JOIN country co ON c.country_id = co.id
+                           WHERE c.name ILIKE $1`;
+
+            const result = await client.query(query, [`%${name}%`]);
             const airports = result.rows.map((row) => AirportResponse(row));
             return airports;
         } finally {

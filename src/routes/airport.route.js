@@ -11,7 +11,17 @@ router.get("/code/:code", airportController.getAirportByCodeController); // ok
 router.delete("/:id", airportController.deleteAirportController);
 router.patch("/name/:id", airportController.updateAirportNameController);
 router.patch("/code/:id", airportController.updateAirportCodeController);
-router.get("/city/name/:name", airportController.getAirportsInCityByCityNameController);
-router.get("/city/id/:id", airportController.getAirportsInCityByCityIdController);
+router.get(
+    "/city/name/:name",
+    airportController.getAirportsInCityByCityNameController
+);
+router.get(
+    "/city/search/:name",
+    airportController.getAirportsByCityNameREController
+);
+router.get(
+    "/city/id/:id",
+    airportController.getAirportsInCityByCityIdController
+);
 
 export default router;

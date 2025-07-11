@@ -179,7 +179,29 @@ class FlightRepository {
 
             return flights;
         } finally {
-            await client.release();
+            client.release();
+        }
+    };
+    
+    getFlightsByAirportIdAndDepartureDate = async (id, date) => {
+        const client = await this.pool.connect();
+        try {
+            const query = `
+            SELECT f.id, sc.id as source_city_id
+            FROM flight f
+            INNER JOIN airport sa on sa.id = f.source_airport_id
+            INNER JOIN city sc on sc.id = sa.city_id
+            WHERE sa.id = $1
+            AND TO_CHAR(f.departure_time, 'YYYY-MM-DD') = $2;`;
+            const result = await client.query(query, [id, date]);
+            const flights = result.rows;
+            if (!flights) {
+                throw new ApiError(`Flight not found`, 400);
+            }
+
+            return flights;
+        } finally {
+            client.release();
         }
     };
 

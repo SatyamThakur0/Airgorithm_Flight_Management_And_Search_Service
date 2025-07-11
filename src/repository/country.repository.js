@@ -63,18 +63,19 @@ class CountryRepository {
         }
     };
 
-    getCountryIdByCityId = async (id) => {
+    getCountryIdByAirportId = async (id) => {
         const client = await this.pool.connect();
         try {
             const query = `SELECT co.id FROM country co
             INNER JOIN city c ON c.country_id = co.id
-            WHERE c.id = $1`;
+            INNER JOIN airport a ON a.city_id  = c.id
+            WHERE a.id = $1`;
             const result = await client.query(query, [id]);
-            const newCountry = result.rows[0];
-            if(!newCountry){
+            const country = result.rows[0];
+            if(!country){
                 return new ApiResponse(false, "Country not found", 404);
             }
-            return newCountry;
+            return country;
         } finally {
             await client.release();
         }

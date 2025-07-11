@@ -26,6 +26,9 @@ class AirportService {
     getAirportsInCityByCityNameService = async (name) => {
         return this.airportRepository.getAirportsInCityByCityName(name);
     };
+    getAirportsByCityNameREService = async (name) => {
+        return this.airportRepository.getAirportsByCityNameRE(name);
+    };
     getAirportsInCityByCityIdService = async (id) => {
         return this.airportRepository.getAirportsInCityByCityId(id);
     };

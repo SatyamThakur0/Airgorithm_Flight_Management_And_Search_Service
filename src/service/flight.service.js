@@ -53,8 +53,8 @@ class FlightService {
     };
 
     getFlightsBySourceAndDestinationCityIdService = async (
-        source_city_id,
-        destination_city_id,
+        source_airport_id,
+        destination_airport_id,
         departure_date
     ) => {
         let STOPS = 1;
@@ -65,17 +65,18 @@ class FlightService {
         const queue = []; // JourneyTriplet((set), [f1, f2, f3 ...], stops)
 
         const flights =
-            await this.flightRepository.getFlightsByCityIdAndDepartureDate(
-                source_city_id,
+            await this.flightRepository.getFlightsByAirportIdAndDepartureDate(
+                source_airport_id,
                 departure_date
             );
-        // console.log(flights.length);
 
         const sourceCountryId =
-            await this.countryRepository.getCountryIdByCityId(source_city_id);
+            await this.countryRepository.getCountryIdByAirportId(
+                source_airport_id
+            );
         const destinationCountryId =
-            await this.countryRepository.getCountryIdByCityId(
-                destination_city_id
+            await this.countryRepository.getCountryIdByAirportId(
+                destination_airport_id
             );
         if (sourceCountryId !== destinationCountryId) {
             STOPS = 3;
@@ -99,10 +100,12 @@ class FlightService {
             const lastFlight = await this.getFlightByIdService(lastFlightId);
 
             if (
-                lastFlight.destination_city_id === destination_city_id ||
+                lastFlight.destination_airport_id === destination_airport_id ||
                 remainingStops === 0
             ) {
-                if (lastFlight.destination_city_id === destination_city_id)
+                if (
+                    lastFlight.destination_airport_id === destination_airport_id
+                )
                     allJourney.push(flights);
                 continue;
             }
