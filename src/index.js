@@ -21,7 +21,10 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-    return res.send("Welcome to the Airline Management Service!");
+    return res.json({
+        ok: true,
+        message: "Flight Management Service is Running...",
+    });
 });
 
 app.use("/flight", router);

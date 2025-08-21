@@ -9,7 +9,9 @@ export function startCronJobForAutomaticFlightCreation() {
         console.log(targetDate);
         flightService.createAutomationFlights(targetDate);
     });
-    cron.schedule("*/5 * * * * *", () => {
-        console.log(new Date());
+    cron.schedule("*/5 * * * * *", async () => {
+        let res = await fetch(`${process.env.SELF}`);
+        res = await res.json();
+        console.log(res.message, " : ", new Date().getSeconds());
     });
 }
