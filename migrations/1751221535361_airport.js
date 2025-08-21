@@ -15,8 +15,8 @@ export const up = (pgm) => {
         name VARCHAR(255) NOT NULL UNIQUE,
         code VARCHAR(10) NOT NULL UNIQUE,
         city_id UUID NOT NULL,
-        created_at TIMESTAMP DEFAULT NOW(),
-        updated_at TIMESTAMP DEFAULT NOW()
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
         );
     `);
 };

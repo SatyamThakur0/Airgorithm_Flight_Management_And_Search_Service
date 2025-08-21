@@ -29,8 +29,8 @@ class AirplaneService {
     updateAirplaneCodeService = async (id, code) => {
         return this.airplaneRepository.updateAirplaneCode(id, code);
     };
-    updateAirplaneCapacityService = async (id, capacity) => {
-        return this.airplaneRepository.updateAirplaneCapacity(id, capacity);
+    getAirplanesByNameREService = async (name) => {
+        return this.airplaneRepository.getAirplanesByNameRE(name);
     };
 }
 export default AirplaneService;

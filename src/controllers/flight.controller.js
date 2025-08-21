@@ -1,14 +1,7 @@
 import { DatabaseError } from "pg";
 import FlightService from "../service/flight.service.js";
 import { ApiError, ApiResponse } from "../utils/api.utils.js";
-import {
-    flightResponse,
-    flightsResponse,
-    flightSummaryResponse,
-    flightsSummaryResponse,
-    flightSearchResponse,
-    flightsSearchResponse,
-} from "../utils/flight.utils.js";
+import { flightResponse, flightsResponse } from "../utils/flight.utils.js";
 
 class FlightController {
     flightService;
@@ -19,13 +12,14 @@ class FlightController {
     createFlightController = async (req, res) => {
         try {
             const {
+                flight_number,
                 airplane_id,
                 source_airport_id,
                 destination_airport_id,
                 departure_time,
                 arrival_time,
                 price,
-                booked_seats,
+                class_price_factor,
             } = req.body;
 
             if (
@@ -48,13 +42,14 @@ class FlightController {
             }
 
             const flight = {
+                flight_number,
                 airplane_id,
                 source_airport_id,
                 destination_airport_id,
                 departure_time,
                 arrival_time,
                 price,
-                booked_seats: booked_seats || 0,
+                class_price_factor,
             };
 
             const newFlight = await this.flightService.createFlightService(
@@ -77,6 +72,31 @@ class FlightController {
                 return;
             }
             res.status(500).json("Something went wrong");
+        }
+    };
+
+    createFlightCycleController = async (req, res) => {
+        try {
+            const flightsData = req.body;
+            if (!flightsData) {
+                return res
+                    .status(400)
+                    .json(
+                        new ApiResponse(false, "Flights data is required", 400)
+                    );
+            }
+            const allFlights =
+                await this.flightService.createFlightCycleService(flightsData);
+            return res.json(
+                new ApiResponse(
+                    true,
+                    "Flight cycle created successfully",
+                    201,
+                    allFlights
+                )
+            );
+        } catch (error) {
+            return res.json(new ApiError(error.message));
         }
     };
 
@@ -177,6 +197,8 @@ class FlightController {
                     destination,
                     date
                 );
+            // console.log(flights);
+
             return res.json(
                 new ApiResponse(
                     true,
@@ -321,6 +343,71 @@ class FlightController {
                     "Flight price updated successfully",
                     200,
                     flightResponse(flight)
+                )
+            );
+        } catch (error) {
+            return res.json(new ApiError(error.message));
+        }
+    };
+
+    updateFlightSeatController = async (req, res) => {
+        try {
+            const { id } = req.params;
+            if (!id) {
+                return res
+                    .status(400)
+                    .json(
+                        new ApiResponse(
+                            false,
+                            "Both flight id is required",
+                            400
+                        )
+                    );
+            }
+
+            const flight = await this.flightService.updateFlightSeatService(id);
+            return res.json(
+                new ApiResponse(
+                    true,
+                    "Flight booked seats incremented successfully",
+                    200,
+                    flightResponse(flight)
+                )
+            );
+        } catch (error) {
+            return res.json(new ApiError(error.message));
+        }
+    };
+
+    createAutomationFlightsController = async (req, res) => {
+        try {
+            const { date } = req.params;
+            // console.log("controller reached : ", date);
+
+            const target_date = new Date(date);
+            const today = new Date();
+            if (!target_date)
+                return res.json(
+                    new ApiResponse(true, "Target date required!", 400)
+                );
+            if (target_date < today)
+                return res.json(
+                    new ApiResponse(
+                        false,
+                        "Cannot create cycles for past dates.",
+                        400
+                    )
+                );
+
+            const flights = await this.flightService.createAutomationFlights(
+                target_date
+            );
+            return res.json(
+                new ApiResponse(
+                    true,
+                    "Flights created successfully",
+                    200,
+                    flights
                 )
             );
         } catch (error) {

@@ -1,6 +1,10 @@
 import CountryRepository from "../repository/country.repository.js";
 import FlightRepository from "../repository/flight.repository.js";
-import { flightSearchResponse, JourneyTriplet } from "../utils/flight.utils.js";
+import {
+    flightResponse,
+    flightSearchResponse,
+    JourneyTriplet,
+} from "../utils/flight.utils.js";
 
 class FlightService {
     flightRepository;
@@ -12,6 +16,43 @@ class FlightService {
 
     createFlightService = async (flight) => {
         return this.flightRepository.createFlight(flight);
+    };
+
+    createLegFlight = async (flight_cycle_id, index, leg) => {
+        return this.flightRepository.createLegFlight(
+            flight_cycle_id,
+            index,
+            leg
+        );
+    };
+
+    createFlightCycleService = async (data) => {
+        try {
+            const flight_cycle_payload = {
+                airplane_id: data.airplane_id,
+                total_days: data.total_days,
+                start_date: data.start_date,
+            };
+            const flight_cycle_id =
+                await this.flightRepository.createFlightCycle(
+                    flight_cycle_payload
+                );
+
+            let leg_flights = [];
+
+            for (let [index, leg] of data.legs.entries()) {
+                const leg_flight = await this.createLegFlight(
+                    flight_cycle_id,
+                    index,
+                    leg
+                );
+                leg_flights.push(leg_flight);
+            }
+
+            return leg_flights;
+        } catch (error) {
+            throw new Error(error.message);
+        }
     };
 
     getFlightByIdService = async (id) => {
@@ -173,6 +214,88 @@ class FlightService {
 
     updateFlightPriceService = async (id, newPrice) => {
         return this.flightRepository.updateFlightPrice(id, newPrice);
+    };
+
+    updateFlightSeatService = async (id) => {
+        return this.flightRepository.updateFlightSeat(id);
+    };
+
+    createAutomationFlights = async (date) => {
+        //2025-08-14
+        try {
+            const target_date = new Date(date);
+            const allLegs = await this.flightRepository.getAllLegs();
+
+            let flights = [];
+            let cyclesMap = new Map();
+            for (let leg of allLegs) {
+                const departure_time = leg.departure_time;
+                const departure_day_offset = leg.departure_day_offset;
+                const [dh, dm, ds] = departure_time.split(":").map(Number);
+                const departure_timestamp = new Date(
+                    target_date.getTime() + departure_day_offset * 86400000 // add days
+                );
+                departure_timestamp.setHours(dh, dm, ds, 0);
+
+                const arrival_time = leg.arrival_time;
+                const arrival_day_offset = leg.arrival_day_offset;
+                const [ah, am, as] = arrival_time.split(":").map(Number);
+                const arrival_timestamp = new Date(
+                    target_date.getTime() + arrival_day_offset * 86400000 // add days
+                );
+                arrival_timestamp.setHours(ah, am, as, 0);
+
+                const flightPayload = {
+                    flight_number: leg.flight_number,
+                    airplane_id: leg.airplane_id,
+                    source_airport_id: leg.source_airport_id,
+                    destination_airport_id: leg.destination_airport_id,
+                    departure_time: departure_timestamp,
+                    arrival_time: arrival_timestamp,
+                    price: leg.price,
+                    class_price_factor: leg.class_price_factor,
+                    generated_cycle_id: leg.flight_cycle_id,
+                    generated_leg_order: leg.leg_order,
+                    generated_for_date: target_date,
+                };
+                if (!cyclesMap.has(leg.flight_cycle_id)) {
+                    cyclesMap.set(leg.flight_cycle_id, {
+                        airplane_id: leg.airplane_id,
+                        total_days: leg.total_days,
+                        start_date: leg.start_date,
+                        legs: [],
+                    });
+                }
+                cyclesMap.get(leg.flight_cycle_id).legs.push(flightPayload);
+            }
+
+            for (let [key, value] of cyclesMap) {
+                // console.log("Cycles Map : ", cyclesMap.get(key).legs);
+                const start_date = new Date(value.start_date);
+                const total_days = value.total_days;
+                const days_since_start = Math.floor(
+                    new Date(target_date - start_date) / 86400000
+                );
+
+                if (days_since_start % total_days == 0) {
+                    console.log("Banegi");
+                    for (let flight_entry of value.legs) {
+                        const flight = await this.flightRepository.createFlight(
+                            flight_entry
+                        );
+                        if (flight) {
+                            flights.push(flightResponse(flight));
+                        }
+                    }
+                } else {
+                    console.log("Nahi Banegi");
+                }
+            }
+            return flights;
+        } catch (error) {
+            // throw new Error(error.message);
+            console.log(error.stack);
+        }
     };
 }
 

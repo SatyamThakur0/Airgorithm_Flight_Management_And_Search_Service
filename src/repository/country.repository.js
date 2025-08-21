@@ -72,7 +72,7 @@ class CountryRepository {
             WHERE a.id = $1`;
             const result = await client.query(query, [id]);
             const country = result.rows[0];
-            if(!country){
+            if (!country) {
                 return new ApiResponse(false, "Country not found", 404);
             }
             return country;
@@ -136,6 +136,20 @@ class CountryRepository {
                 throw new ApiError(500, `Country with id : ${id} not found`);
             }
             return updatedCountry;
+        } finally {
+            await client.release();
+        }
+    };
+
+    getCountriesByNameRE = async (name) => {
+        const client = await this.pool.connect();
+        try {
+            const query = `SELECT id, name, code
+                           FROM country
+                           WHERE name ILIKE $1`;
+
+            const result = await client.query(query, [`%${name}%`]);
+            return result.rows;
         } finally {
             await client.release();
         }

@@ -15,8 +15,8 @@ export const up = (pgm) => {
         name VARCHAR(50) NOT NULL,
         code VARCHAR(10) NOT NULL,
         capacity INT NOT NULL,
-        created_at TIMESTAMP DEFAULT NOW(),
-        updated_at TIMESTAMP DEFAULT NOW()
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
     )
     `);
     pgm.sql(`

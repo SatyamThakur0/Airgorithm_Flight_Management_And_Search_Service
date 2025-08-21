@@ -125,7 +125,7 @@ class AirportRepository {
             const result = await client.query(query, [code]);
             const airport = result.rows[0];
             if (airport === undefined) {
-                throw new ApiError(`Airport with name ${code} not found`, 400);
+                return "";
             }
             return AirportResponse(airport);
         } finally {

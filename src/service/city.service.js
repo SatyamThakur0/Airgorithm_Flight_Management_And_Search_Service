@@ -23,5 +23,8 @@ class CityService {
     updateCityNameService = async (id, name) => {
         return this.cityRepository.updateCityName(id, name);
     };
+    getCitiesByNameREService = async (name) => {
+        return this.cityRepository.getCitiesByNameRE(name);
+    };
 }
 export default CityService;

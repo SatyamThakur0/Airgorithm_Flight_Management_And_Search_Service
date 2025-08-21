@@ -7,7 +7,7 @@ class CityController {
     constructor() {
         this.cityService = new CityService();
     }
- 
+
     createCityController = async (req, res) => {
         try {
             const { name, country_id } = req.body;
@@ -15,6 +15,11 @@ class CityController {
             if (!name || !country_id) {
                 return new ApiResponse(false, `Unsufficient input data`);
             }
+            const isExist = await this.cityService.getCityByNameService(name);
+            if (isExist)
+                return res.json(
+                    new ApiResponse(false, `City ${name} already exists.`, 409)
+                );
             const city = { name, country_id };
             const newCity = await this.cityService.createCityService(city);
             return res.json(
@@ -88,6 +93,20 @@ class CityController {
             const city = await this.cityService.updateCityNameService(id, name);
 
             return res.json(new ApiResponse(true, "city name updated", city));
+        } catch (error) {
+            return res.json(new ApiError(error.message));
+        }
+    };
+
+    getCitiesByNameREController = async (req, res) => {
+        try {
+            const { name } = req.params;
+            const cities = await this.cityService.getCitiesByNameREService(
+                name
+            );
+            return res.json(
+                new ApiResponse(true, "cities fetched", 200, cities)
+            );
         } catch (error) {
             return res.json(new ApiError(error.message));
         }

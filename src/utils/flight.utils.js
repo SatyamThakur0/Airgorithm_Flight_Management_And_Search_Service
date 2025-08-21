@@ -6,6 +6,7 @@ export const flightResponse = (flight) => {
         arrival_time: flight.arrival_time,
         price: flight.price,
         booked_seats: flight.booked_seats,
+        class_price_factor: flight.class_price_factor,
         status: flight.status,
         created_at: flight.created_at,
         updated_at: flight.updated_at,
@@ -13,7 +14,7 @@ export const flightResponse = (flight) => {
             id: flight.airplane_id,
             name: flight.airplane_name,
             code: flight.airplane_code,
-            capacity: flight.airplane_capacity,
+            seat: flight.seat_distribution,
             created_at: flight.airplane_created_at,
             updated_at: flight.airplane_updated_at,
         },
@@ -74,6 +75,7 @@ export const flightSummaryResponse = (flight) => {
         flight_number: flight.flight_number,
         departure_time: flight.departure_time,
         arrival_time: flight.arrival_time,
+        class_price_factor: flight.class_price_factor,
         price: flight.price,
         status: flight.status,
         source: {
@@ -89,7 +91,7 @@ export const flightSummaryResponse = (flight) => {
         airplane: {
             name: flight.airplane_name,
             code: flight.airplane_code,
-            capacity: flight.airplane_capacity,
+            seat: flight.seat_distribution,
         },
     };
 };
@@ -105,7 +107,7 @@ export const flightSearchResponse = (flight) => {
         departure_time: flight.departure_time.toLocaleString(),
         arrival_time: flight.arrival_time.toLocaleString(),
         price: flight.price,
-        available_seats: flight.airplane_capacity - flight.booked_seats,
+        class_price_factor: flight.class_price_factor,
         status: flight.status,
         route: {
             from: {
@@ -124,7 +126,7 @@ export const flightSearchResponse = (flight) => {
         airplane: {
             name: flight.airplane_name,
             code: flight.airplane_code,
-            capacity: flight.airplane_capacity,
+            seat: flight.airplane_seat_distribution,
         },
     };
 };

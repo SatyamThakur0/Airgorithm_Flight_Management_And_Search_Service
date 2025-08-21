@@ -30,5 +30,8 @@ class CountryService {
     updateCountryCodeService = async (id, code) => {
         return this.countryRepository.updateCountryCode(id, code);
     };
+    getCountriesByNameREService = async (name) => {
+        return this.countryRepository.getCountriesByNameRE(name);
+    };
 }
 export default CountryService;

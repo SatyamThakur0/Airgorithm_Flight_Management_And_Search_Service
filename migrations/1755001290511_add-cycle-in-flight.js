@@ -10,13 +10,13 @@ export const shorthands = undefined;
  */
 export const up = (pgm) => {
     pgm.sql(`
-        CREATE TABLE IF NOT EXISTS city (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        name VARCHAR(255) NOT NULL,
-        country_id UUID NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
-        updated_at TIMESTAMPTZ DEFAULT NOW()
-        );
+        ALTER TABLE flight
+        ADD COLUMN generated_cycle_id UUID REFERENCES flight_cycle(id) DEFAULT NULL,
+        ADD COLUMN generated_leg_order INTEGER DEFAULT NULL,
+        ADD COLUMN generated_for_date DATE DEFAULT NULL;
+
+        CREATE UNIQUE INDEX unique_generated_date_and_flight_number
+        ON flight (flight_number, generated_for_date);
     `);
 };
 
@@ -27,6 +27,9 @@ export const up = (pgm) => {
  */
 export const down = (pgm) => {
     pgm.sql(`
-        DROP TABLE city;
+        ALTER TABLE flight
+        DROP COLUMN generated_cycle_id,
+        DROP COLUMN generated_leg_order,
+        DROP COLUMN generated_for_date;
     `);
 };

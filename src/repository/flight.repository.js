@@ -8,21 +8,84 @@ class FlightRepository {
     createFlight = async (flight) => {
         const client = await this.pool.connect();
         try {
-            const query = `INSERT INTO flight (airplane_id, source_airport_id, destination_airport_id, departure_time, arrival_time, price, booked_seats)
-            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
+            const query = `INSERT INTO flight (flight_number, airplane_id, source_airport_id, destination_airport_id, departure_time, arrival_time, price, class_price_factor, generated_cycle_id, generated_leg_order, generated_for_date)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) ON CONFLICT (flight_number, generated_for_date) DO NOTHING RETURNING *`;
             const result = await client.query(query, [
+                flight.flight_number,
                 flight.airplane_id,
                 flight.source_airport_id,
                 flight.destination_airport_id,
                 flight.departure_time,
                 flight.arrival_time,
                 flight.price,
-                flight.booked_seats,
+                flight.class_price_factor,
+                flight.generated_cycle_id || null,
+                flight.generated_leg_order || null,
+                flight.generated_for_date || null
             ]);
+            if(!result.rows[0]) return;
             const newFlight = this.getFlightById(result.rows[0].id);
             return newFlight;
         } finally {
             client.release();
+        }
+    };
+
+    createLegFlight = async (flight_cycle_id, index, leg) => {
+        const client = await this.pool.connect();
+        try {
+            const query = `INSERT INTO flight_cycle_leg (
+                           flight_cycle_id, leg_order, source_airport_id, destination_airport_id, departure_time, arrival_time, departure_day_offset, arrival_day_offset, price, class_price_factor)
+                           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`;
+            const result = await client.query(query, [
+                flight_cycle_id,
+                index + 1,
+                leg.source_airport_id,
+                leg.destination_airport_id,
+                leg.departure_time,
+                leg.arrival_time,
+                leg.departure_day_offset,
+                leg.arrival_day_offset,
+                leg.price,
+                leg.class_price_factor,
+            ]);
+            return result.rows[0];
+        } finally {
+            client.release();
+        }
+    };
+
+    getAllLegs = async()=>{
+        try {
+            const client = await this.pool.connect();
+            const query = `SELECT fcl.*, fc.id as flight_cycle_id, fc.airplane_id,
+                           fc.total_days, fc.start_date
+                           FROM flight_cycle_leg fcl
+                           INNER JOIN flight_cycle fc
+                           ON fcl.flight_cycle_id = fc.id
+                           ORDER BY fc.id, fcl.leg_order;`;
+            const result = await client.query(query);
+            return result.rows;
+            
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    }
+
+    createFlightCycle = async ({ airplane_id, total_days, start_date }) => {
+        
+        const client = await this.pool.connect();
+        try {
+            const query = `INSERT INTO flight_cycle (airplane_id, total_days, start_date)
+                           VALUES ($1, $2, $3) RETURNING *`;
+            const flight_cycle = await client.query(query, [
+                airplane_id,
+                total_days,
+                start_date,
+            ]);
+            return flight_cycle.rows[0].id;
+        } catch (error) {
+            throw new Error(error.message);
         }
     };
 
@@ -59,7 +122,7 @@ class FlightRepository {
                            ap.id as airplane_id,
                            ap.name as airplane_name,
                            ap.code as airplane_code,
-                           ap.capacity as airplane_capacity,
+                           ap.seat_distribution as airplane_seat_distribution,
                            ap.created_at as airplane_created_at,
                            ap.updated_at as airplane_updated_at,
                            sc.id AS source_city_id,
@@ -117,7 +180,7 @@ class FlightRepository {
                            ap.id as airplane_id,
                            ap.name as airplane_name,
                            ap.code as airplane_code,
-                           ap.capacity as airplane_capacity,
+                           ap.seat_distribution as airplane_seat_distribution,
                            ap.created_at as airplane_created_at,
                            ap.updated_at as airplane_updated_at,
                            sc.id AS source_city_id,
@@ -182,7 +245,7 @@ class FlightRepository {
             client.release();
         }
     };
-    
+
     getFlightsByAirportIdAndDepartureDate = async (id, date) => {
         const client = await this.pool.connect();
         try {
@@ -224,9 +287,7 @@ class FlightRepository {
             INNER JOIN airport da on da.id = f.destination_airport_id
             INNER JOIN city dc on dc.id = da.city_id
             WHERE f.source_airport_id = $1`;
-            const result = await client.query(query, [
-                airportId,
-            ]);
+            const result = await client.query(query, [airportId]);
             const flights = result.rows;
             return flights;
         } finally {
@@ -307,6 +368,24 @@ class FlightRepository {
         }
     };
 
+    updateFlightSeat = async (id) => {
+        const client = await this.pool.connect();
+        try {
+            const query = `UPDATE flight
+                            SET booked_seats = booked_seats + 1
+                            WHERE id = $1 RETURNING *;`;
+            const flight = await client.query(query, [id]);
+
+            if (!flight) {
+                throw new ApiResponse(false, "Flight not found", 404);
+            }
+
+            return flight;
+        } finally {
+            await client.release();
+        }
+    };
+
     getAllFlights = async () => {
         const client = await this.pool.connect();
         try {
@@ -324,7 +403,7 @@ class FlightRepository {
                            ap.id as airplane_id,
                            ap.name as airplane_name,
                            ap.code as airplane_code,
-                           ap.capacity as airplane_capacity,
+                           ap.seat_distribution as airplane_seat_distribution,
                            ap.created_at as airplane_created_at,
                            ap.updated_at as airplane_updated_at,
                            sc.id AS source_city_id,

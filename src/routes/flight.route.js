@@ -15,6 +15,7 @@ router.get(
     "/number/:flightNumber",
     flightController.getFlightByFlightNumberController
 );
+router.get("/flight-automation/:date", flightController.createAutomationFlightsController);
 router.delete("/:id", flightController.deleteFlightController);
 router.patch(
     "/source-airport/:id",
@@ -26,5 +27,10 @@ router.patch(
 );
 router.patch("/airplane/:id", flightController.updateFlightAirplaneController);
 router.patch("/price/:id", flightController.updateFlightPriceController);
+router.patch(
+    "/update/booked-seat/:id",
+    flightController.updateFlightSeatController
+);
+router.post("/cycle", flightController.createFlightCycleController);
 
 export default router;

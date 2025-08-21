@@ -15,6 +15,17 @@ class AirportController {
             if (!name || !code || !city_id) {
                 return new ApiResponse(false, `Unsufficient input data`);
             }
+            console.log("Got req in controller : ", name, code, city_id);
+
+            const isExist = await this.airportService.getAirportByCodeService(
+                code
+            );
+            console.log(isExist);
+
+            if (isExist)
+                return res.json(
+                    new ApiResponse(false, "Airport already exists.", 409)
+                );
             const airport = { name, code, city_id };
             const newAirport = await this.airportService.createAirportService(
                 airport
@@ -180,7 +191,7 @@ class AirportController {
             return res.json(new ApiError(error.message));
         }
     };
-    
+
     getAirportsInCityByCityIdController = async (req, res) => {
         try {
             const { id } = req.params;

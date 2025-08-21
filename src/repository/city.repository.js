@@ -98,7 +98,8 @@ class CityRepository {
             const result = await client.query(query, [name]);
             const city = result.rows[0];
             if (city === undefined) {
-                throw new ApiError(`City with name ${name} not found`, 400);
+                // throw new ApiError(`City with name ${name} not found`, 400);
+                return "";
             }
             const cityResponse = {
                 id: city.city_id,
@@ -172,6 +173,24 @@ class CityRepository {
             return cities;
         } finally {
             client.release();
+        }
+    };
+
+    getCitiesByNameRE = async (name) => {
+        const client = await this.pool.connect();
+        console.log("Api hitted ", name);
+
+        try {
+            const query = `SELECT c.id, c.name, con.code
+                           FROM city c
+                           INNER JOIN country con
+                           ON c.country_id = con.id
+                           WHERE c.name ILIKE $1`;
+
+            const result = await client.query(query, [`%${name}%`]);
+            return result.rows;
+        } finally {
+            await client.release();
         }
     };
 }

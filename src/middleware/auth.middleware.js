@@ -9,11 +9,13 @@ class AuthMiddleware {
     }
 
     authenticate = (req, res, next) => {
-        const authHeader = req.headers["authorization"];
+        const authHeader = req.headers["Authorization"] || req.cookies.token;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
             return res.status(401).json(new ApiError("No token provided", 401));
         }
         const token = authHeader.split(" ")[1];
+        console.log(token);
+
         try {
             const decoded = jwt.verify(token, this.jwtSecret);
             req.user = decoded;

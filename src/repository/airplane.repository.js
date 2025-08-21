@@ -8,12 +8,12 @@ class AirplaneRepository {
     createAirplane = async (airplane) => {
         const client = await this.pool.connect();
         try {
-            const query = `INSERT INTO airplane (name, code, capacity)
+            const query = `INSERT INTO airplane (name, code, seat_distribution)
             VALUES ($1, $2, $3) RETURNING *`;
             const result = await client.query(query, [
                 airplane.name,
                 airplane.code,
-                airplane.capacity,
+                airplane.seat_distribution,
             ]);
             const newAirplane = result.rows[0];
             return newAirplane;
@@ -80,9 +80,6 @@ class AirplaneRepository {
                            WHERE code = $1`;
             const result = await client.query(query, [code]);
             const airplane = result.rows[0];
-            if (airplane === undefined) {
-                throw new ApiError(`Airplane with name ${code} not found`, 400);
-            }
             return airplane;
         } finally {
             await client.release();
@@ -121,22 +118,6 @@ class AirplaneRepository {
         }
     };
 
-    updateAirplaneCapacity = async (id, capacity) => {
-        const client = await this.pool.connect();
-        try {
-            const query =
-                "UPDATE airplane SET capacity = $1 WHERE id = $2 RETURNING *";
-            const result = await client.query(query, [capacity, id]);
-            const airplane = result.rows[0];
-            if (!airplane) {
-                throw new ApiResponse(false, "Airplane not found", 404);
-            }
-            return airplane;
-        } finally {
-            await client.release();
-        }
-    };
-
     getAllAirplanes = async () => {
         const client = await this.pool.connect();
         try {
@@ -147,6 +128,21 @@ class AirplaneRepository {
             return airplanes;
         } finally {
             client.release();
+        }
+    };
+
+    getAirplanesByNameRE = async (name) => {
+        const client = await this.pool.connect();
+
+        try {
+            const query = `SELECT name, id, code
+                           FROM airplane
+                           WHERE name ILIKE $1`;
+
+            const result = await client.query(query, [`%${name}%`]);
+            return result.rows;
+        } finally {
+            await client.release();
         }
     };
 }

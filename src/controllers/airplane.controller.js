@@ -9,13 +9,25 @@ class AirplaneController {
     }
 
     createAirplaneController = async (req, res) => {
-        try {
-            const { name, code, capacity } = req.body;
 
-            if (!name || !code || !capacity) {
+        try {
+            const { name, code, seat_distribution } = req.body;
+
+            if (!name || !code || !seat_distribution) {
                 return new ApiResponse(false, `Unsufficient input data`);
             }
-            const airplane = { name, code, capacity };
+            const isExist = await this.airplaneService.getAirplaneByCodeService(
+                code
+            );
+            if (isExist)
+                return res.json(
+                    new ApiResponse(
+                        false,
+                        `Airplane with code ${code} already exists.`,
+                        409
+                    )
+                );
+            const airplane = { name, code, seat_distribution };
             const newAirplane =
                 await this.airplaneService.createAirplaneService(airplane);
             return res.json(
@@ -145,35 +157,14 @@ class AirplaneController {
         }
     };
 
-    updateAirplaneCapacityController = async (req, res) => {
+    getAirplanesByNameREController = async (req, res) => {
         try {
-            const { id } = req.params;
-            const { capacity } = req.body;
-
-            if (!id || !capacity) {
-                return res
-                    .status(400)
-                    .json(
-                        new ApiResponse(
-                            false,
-                            "both id and capacity required",
-                            400
-                        )
-                    );
-            }
-            const airplane =
-                await this.airplaneService.updateAirplaneCapacityService(
-                    id,
-                    capacity
-                );
-
+            const { name } = req.params;
+            const cities = await this.airplaneService.getAirplanesByNameREService(
+                name
+            );
             return res.json(
-                new ApiResponse(
-                    true,
-                    "airplane capacity updated",
-                    200,
-                    airplane
-                )
+                new ApiResponse(true, "Airplanes fetched", 200, cities)
             );
         } catch (error) {
             return res.json(new ApiError(error.message));

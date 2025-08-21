@@ -9,15 +9,12 @@ export const shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 export const up = (pgm) => {
-    pgm.sql(`
-        CREATE TABLE IF NOT EXISTS city (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        name VARCHAR(255) NOT NULL,
-        country_id UUID NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
-        updated_at TIMESTAMPTZ DEFAULT NOW()
-        );
-    `);
+    pgm.sql(
+        `ALTER TABLE airplane DROP COLUMN IF EXISTS capacity;`
+    );
+    pgm.sql(
+        `ALTER TABLE airplane ADD COLUMN seat_distribution JSONB NOT NULL DEFAULT '{}';`
+    );
 };
 
 /**
@@ -26,7 +23,8 @@ export const up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 export const down = (pgm) => {
-    pgm.sql(`
-        DROP TABLE city;
-    `);
+    pgm.sql(`ALTER TABLE airplane DROP COLUMN IF EXISTS seat_distribution;`);
+    pgm.sql(
+        `ALTER TABLE airplane ADD COLUMN capacity INTEGER;`
+    );
 };

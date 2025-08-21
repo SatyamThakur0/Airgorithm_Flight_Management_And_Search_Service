@@ -132,6 +132,19 @@ class CountryController {
             return res.json(new ApiError(error.message));
         }
     };
+
+    getCountriesByNameREController = async (req, res) => {
+        try {
+            const { name } = req.params;
+            const countries =
+                await this.countryService.getCountriesByNameREService(name);
+            return res.json(
+                new ApiResponse(true, "countries fetched", 200, countries)
+            );
+        } catch (error) {
+            return res.json(new ApiError(error.message));
+        }
+    };
 }
 
 export default CountryController;
