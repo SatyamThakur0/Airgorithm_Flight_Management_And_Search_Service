@@ -30,10 +30,3 @@ app.listen(PORT, () => {
     console.log(`Flight Management Service is Running on PORT : ${PORT}`);
 });
 startCronJobForAutomaticFlightCreation();
-// cron.schedule("3 0 * * *", () => {
-//     const now = new Date();
-//     now.setUTCDate(now.getUTCDate() + 60);
-//     const targetDate = now.toISOString().split("T")[0];
-//     console.log(targetDate);
-//     flightService.createAutomationFlights(targetDate);
-// });

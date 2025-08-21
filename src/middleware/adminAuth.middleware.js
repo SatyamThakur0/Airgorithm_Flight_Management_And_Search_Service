@@ -5,7 +5,7 @@ config();
 
 class AdminAuthMiddleware {
     constructor() {
-        this.jwtSecret = process.env.JWT_SECRET || "default_jwt_secret";
+        this.jwtSecret = process.env.JWT_SECRET;
     }
 
     authenticate = (req, res, next) => {
