@@ -13,7 +13,9 @@ class CityController {
             const { name, country_id } = req.body;
 
             if (!name || !country_id) {
-                return new ApiResponse(false, `Unsufficient input data`);
+                return res.json(
+                    new ApiResponse(false, `Unsufficient input data`)
+                );
             }
             const isExist = await this.cityService.getCityByNameService(name);
             if (isExist)
