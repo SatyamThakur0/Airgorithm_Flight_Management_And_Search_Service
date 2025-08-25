@@ -278,8 +278,10 @@ class FlightService {
                 );
 
                 if (days_since_start % total_days == 0) {
-                    console.log("Banegi");
+                    // console.log("Banegi");
                     for (let flight_entry of value.legs) {
+                        // console.log(flight_entry);
+
                         const flight = await this.flightRepository.createFlight(
                             flight_entry
                         );
@@ -288,13 +290,13 @@ class FlightService {
                         }
                     }
                 } else {
-                    console.log("Nahi Banegi");
+                    // console.log("Nahi Banegi");
                 }
             }
             return flights;
         } catch (error) {
-            // throw new Error(error.message);
-            console.log(error.stack);
+            console.error(error);
+            // continue;
         }
     };
 }

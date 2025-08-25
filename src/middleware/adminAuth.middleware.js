@@ -19,7 +19,6 @@ class AdminAuthMiddleware {
 
         try {
             const decoded = jwt.verify(token, this.jwtSecret);
-            console.log("middleware : ", decoded);
             if (decoded.role != "SUPERVISOR") {
                 return res.json(new ApiResponse("false", "Unauthorized.", 401));
             }

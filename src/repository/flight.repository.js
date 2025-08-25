@@ -21,15 +21,32 @@ class FlightRepository {
                 flight.class_price_factor,
                 flight.generated_cycle_id || null,
                 flight.generated_leg_order || null,
-                flight.generated_for_date || null
+                flight.generated_for_date || null,
             ]);
-            if(!result.rows[0]) return;
-            const newFlight = this.getFlightById(result.rows[0].id);
+            if (!result.rows[0]) return;
+            const newFlight = await this.getFlightById(result.rows[0].id);
             return newFlight;
         } finally {
             client.release();
         }
     };
+
+    // createFlightForSeeding = async (payload) => {
+    //     console.log(payload);
+        
+    //     const client = await this.pool.connect();
+    //     try {
+            
+    //         const query = `INSERT INTO flight (flight_number, airplane_id, source_airport_id, destination_airport_id, departure_time, arrival_time, price, class_price_factor, generated_cycle_id, generated_leg_order, generated_for_date)
+    //         VALUES ${payload} ON CONFLICT (flight_number, generated_for_date) DO NOTHING RETURNING *`;
+    //         const result = await client.query(query);
+    //         if (!result.rows[0]) return;
+    //         const newFlight = await this.getFlightById(result.rows[0].id);
+    //         return newFlight;
+    //     } finally {
+    //         client.release();
+    //     }
+    // };
 
     createLegFlight = async (flight_cycle_id, index, leg) => {
         const client = await this.pool.connect();
@@ -55,7 +72,7 @@ class FlightRepository {
         }
     };
 
-    getAllLegs = async()=>{
+    getAllLegs = async () => {
         try {
             const client = await this.pool.connect();
             const query = `SELECT fcl.*, fc.id as flight_cycle_id, fc.airplane_id,
@@ -66,14 +83,12 @@ class FlightRepository {
                            ORDER BY fc.id, fcl.leg_order;`;
             const result = await client.query(query);
             return result.rows;
-            
         } catch (error) {
             throw new Error(error.message);
         }
-    }
+    };
 
     createFlightCycle = async ({ airplane_id, total_days, start_date }) => {
-        
         const client = await this.pool.connect();
         try {
             const query = `INSERT INTO flight_cycle (airplane_id, total_days, start_date)
