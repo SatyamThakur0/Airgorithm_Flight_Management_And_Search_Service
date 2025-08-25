@@ -33,7 +33,7 @@ app.use("/flight", router);
 app.listen(PORT, () => {
     console.log(`Flight Management Service is Running on PORT : ${PORT}`);
 });
-// startCronJobForAutomaticFlightCreation();
+startCronJobForAutomaticFlightCreation();
 
 const seed = async () => {
     const flightService = new FlightService();
