@@ -84,7 +84,7 @@ class FlightRepository {
             const result = await client.query(query);
             return result.rows;
         } catch (error) {
-            throw new Error(error.message);
+            throw error;
         }
     };
 

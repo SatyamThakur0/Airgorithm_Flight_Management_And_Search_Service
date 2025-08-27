@@ -270,7 +270,6 @@ class FlightService {
             }
 
             for (let [key, value] of cyclesMap) {
-                // console.log("Cycles Map : ", cyclesMap.get(key).legs);
                 const start_date = new Date(value.start_date);
                 const total_days = value.total_days;
                 const days_since_start = Math.floor(
@@ -278,7 +277,7 @@ class FlightService {
                 );
 
                 if (days_since_start % total_days == 0) {
-                    // console.log("Banegi");
+                    console.log("generate");
                     for (let flight_entry of value.legs) {
                         // console.log(flight_entry);
 
@@ -290,13 +289,13 @@ class FlightService {
                         }
                     }
                 } else {
-                    // console.log("Nahi Banegi");
+                    console.log("not generate.");
                 }
             }
             return flights;
         } catch (error) {
             console.error(error);
-            // continue;
+            throw error;
         }
     };
 }
