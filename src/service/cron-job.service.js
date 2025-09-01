@@ -10,11 +10,11 @@ export async function startCronJobForAutomaticFlightCreation() {
             console.log(targetDate);
             flightService.createAutomationFlights(targetDate);
         });
-        cron.schedule("*/5 * * * * *", async () => {
-            let res = await fetch(`${process.env.SELF}`);
-            res = await res.json();
-            console.log(res.message, " : ", new Date().getSeconds());
-        });
+        // cron.schedule("*/5 * * * * *", async () => {
+        //     let res = await fetch(`${process.env.SELF}`);
+        //     res = await res.json();
+        //     console.log(res.message, " : ", new Date().getSeconds());
+        // });
     } catch (error) {
         console.log(error.message);
     }
